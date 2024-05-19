@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
+
 [[ "${1,,}" != +(\-)@(h)?(elp) ]] || { cat <<'EOL'
 NAME:
    dec2hex - decimal to hexadecimal
 USAGE:
    [<{decimal numbers} ...> | ]  dec2hex  [<{decimal numbers} ...>]
-
 SYNOPSIS:
    Converts decimal numbers (0-256) into their hexadecimal equivalents.
    Accepts any amount of input from either, or both, directions.
    Input(s) are processed in the order they were received.
 NOTES:
-   This script is the counterpart to `hex2dec`.
+   This script has a counterpart: `hex2dec`
    https://github.com/asmrtfm/bash_scripts
 
 EOL

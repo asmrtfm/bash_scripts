@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+[[ "${1,,}" != *(\-)@(h)?(elp) ]] || { cat <<'EOL'
+NAME:
+   bin2dec - convert binary to decimal
+
+USAGE:
+   [<{binary numbers} ...> | ] bin2dec [-option] [<{binary numbers} ...>]
+
+SYNOPSIS:
+   Converts binary numbers into their [dot-]decimal equivalents.
+   Input may be supplied from either direction.
+   If the input contains any characters other than 1 and 0, they are treated as 0.
+
+OPTIONS:
+   -h,          show this message.
+    --help
+   -v,          verbose output
+    --verbose    ( `INPUT :  OUTPUT` ... )
+
+NOTES:
+   This script has a counterpart: `dec2bin`
+   https://github.com/asmrtfm/bash_scripts
+
+EOL
+	exit 0
+}
+
+b2d() {
+	local decimal
+	local -i n=0
+	local -ai Decimal Bits=( 128 64 32 16 8 4 2 1 )
+	for d in ${@//\./$IFS} ; do
+		for((i=0;i<8;i++)){ [[ ${d:i:1} != 1 ]] || (( Decimal[n] += Bits[i] )); }
+		((++n))
+	done
+	echo "${Decimal[0]:-0}.${Decimal[1]:-0}.${Decimal[2]:-0}.${Decimal[3]:-0}"
+}
+
+if [[ "${1,,}" == +(\-)@(v)?(erbose) ]]; then
+	while read b; do echo "$b $(b2d $b)"; done < <([ -t 0 ] || cat - ; for((a=2;a<=$#;a++)){ echo "${!a}"; } ) | column -t
+else
+	while read b; do b2d "$b"; done < <([ -t 0 ] || cat - ; for((a=1;a<=$#;a++)){ echo "${!a}"; } )
+fi

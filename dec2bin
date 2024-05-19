@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+[[ "${1,,}" != *(\-)@(h)?(elp) ]] || { cat <<'EOL'
+NAME:
+   dec2bin - convert decimal to binary
+
+USAGE:
+   [<{decimal} ...> | ]  dec2bin  [-option]  [<{decimal} ...>]
+
+SYNOPSIS:
+   Converts decimal numbers (ie: dot-decimal notated ip addresses) into their binary equivalent.
+   Input may be supplied from either or both directions.
+
+OPTIONS:
+   -h,          show this message.
+    --help
+   -v,          verbose output
+    --verbose    ( `INPUT :  OUTPUT` ... )
+
+NOTES:
+   This script has a counterpart: `bin2dec`
+   https://github.com/asmrtfm/bash_scripts
+
+EOL
+	exit 0
+}
+
+d2b() {
+	local Binary
+	for d in ${@//\./$IFS} ; do
+		for((i=128;i>=1;i/=2)){ ((d>=i)) && { Binary+='1' && ((d-=i)) ; } || Binary+='0'; }
+		Binary="${Binary:: -1}."
+	done
+	echo "${Binary:: -1}"
+}
+
+if [[ "${1,,}" == *(\-)@(v)?(erbose) ]]; then
+	while read ip ; do echo "$ip $(d2b $ip)" ; done < <([ -t 0 ] || cat - ; for((a=2;a<=$#;a++)){ echo "${!a}"; } ) | column -t
+else
+	while read ip ; do d2b "$ip" ; done < <([ -t 0 ] || cat - ; for((a=1;a<=$#;a++)){ echo "${!a}"; } )
+fi
