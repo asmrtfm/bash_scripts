@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+[[ "${1,,}" != +(\-)@(h)?(elp) ]] || { cat <<'EOL'
+NAME:
+   hex2dec - hexadecimal to decimal
+USAGE:
+   [<{hexadecimal strings} ...> | ]  hex2dec  [<{hexadecimal strings} ...>]
+
+SYNOPSIS:
+   Converts strings of hexadecimal numbers into their decimal equivalents.
+   Accepts any amount of input from either, or both, directions.
+   Input(s) are processed in the order they were received.
+NOTES:
+   This script is the counterpart to `dec2hex`.
+   https://github.com/asmrtfm/bash_scripts
+
+EOL
+    exit 0
+}
+
+printf '%02d\n' $({ [ -t 0 ] || cat - ; for((a=1;a<=$#;a++)){ echo "${!a}"; }; } | sed 's|^|0x|g') 2>/dev/null

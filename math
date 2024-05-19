@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+[[ "$1" != +(\-)@([hH])?([eE][lL][pP]) ]] || { cat <<'EOL'
+NAME:
+   math - an omnidirectional wrapper for `bc`
+USAGE:
+   [ input | ]  math  [ input ]
+DESCRIPTION:
+   Valid inputs are any combination of numbers and operators recognized by `bc`.
+EXAMPLES:
+   ` math "1.23 * 3" `
+   ` echo "1.23 * 3" | math `
+   ` echo "1.23 | math "* 3" `
+SPECIAL MODE:
+   ` printf '%i\n%f\n%i` 1 1.69 2 | math '+' `
+BONUS:
+   Strips trailing 0s from floats.
+
+EOL
+	exit 0
+}
+
+if (($#==1)); then
+	n=$(case "${1,,}" in
+	\+|\-) echo "$(cat - | tr [[:space:]] "$1" ) 0" ;; #echo "$(cat - | tr $'\n' "$1" ) 0" ;;
+	\*|\/) echo "$(cat - | tr $'\n' "$1" ) 1" ;;
+	'√'|'sqrt') echo "sqrt($(cat -))" ;;
+	*) [ ! -t 0 ] && echo "$(cat -) $1" || echo "$1"
+	esac | bc -l)
+else
+	n=$({ [ ! -t 0 ] && echo "$(cat -) $@" || echo "$@" ; } | bc -l)
+fi
+
+[[ "$n" != *\.*'0' ]] || { until [[ "${n: -1}" != '0' ]]; do n="${n:: -1}" ; done ; [[ "$n" != *\. ]] || n="${n:: -1}" ; }
+
+echo "$n"
+
+
+# Distance between top-left and bottom-right corners of a rectangle:                                  √(width^2 + height^2)
+# To calculate the height of Night District's `martini triangle`:                      width * 1.2
+# Therefor, to plot Night District's iconic `martini triangle`:
+#                                                                             | p :    x    ,   y   |
+#                                                                             |---------------------|
+#                                                                             | a :    0    ,   0   | a=(0, 0)
+#                                                                             | b :    w    ,   0   | b=(width, 0)
+#                                                                             | c : w * 1.2 , w / 2 | c=((width * 1.2), (width / 2))
+#										 √((width/2)^2 + (width * 1.2)^2)
