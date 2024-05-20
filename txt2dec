@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+[[ "$1" != +(\-)@([hH])?([eE][lL][pP]) ]] || { cat <<'EOF'
+COMMAND:
+   txt2dec - convert text into numbers based on their position in the english alphabet
+USAGE:
+   `txt2dec <any> <thing> <...>`
+SYNOPSIS:
+   by default,
+   every character is output on a new line as its numerical index position within the english alphabet.
+   numbers are passed through unchanged and non-alphanumerics are ignored.
+   this default output behavior can be adjusted using the optional parameters below.
+OPTIONS:
+ (* must be passed at the beginning)
+   -h,          show this.
+    --help
+   -l, -v,      label the output with the input.
+    --label,
+    --verbose
+   -t,         sum up the value of all inputs and output a single total.
+    --sum,     (* when combined with `-l|-v|--label|--verbose`,
+    --total          the total is appened to the normal output.)
+   -w          output a total of the converted values per argument,
+    --word      rather than per character in each argument.
+               (* ignored when combined with `-t|--sum|--total`
+                  unless `-l|-v|--label|--verbose` was also specified.)
+NOTE:
+   when using any of the above optional parameters,
+   numbers contained within the input will be included when totals are calculated.
+
+EOF
+	exit 0
+}
+
+_() { [[ "$1" == [0-9] ]] && echo "$1" || { eval echo {a..$1} | wc -w ; } ; }
+#for ((a=1a=o;a<=$#;a++)){ x="${!a}" ; for ((i=0;i<${#x};i++)){ _ "${x:$i:1}" ; } ; }
+
+for ((a=1;a<=$#;a++)); do
+	case "${!a}" in
+	\-[lLvV]|'--label'|'--verbose') Label="True" ;;
+	\-[tT]|'--sum'|'--total') Total="True" ; declare -i total=0 ;;
+  \-[wW]|'--word') Word="True" ;;
+	*) x="${!a}"
+		if [[ "${Total:-false}" == "True" ]]; then
+			### ### ###   ### ### ###   ### ### ###
+			###   include total
+			if [[ "${Label:-false}" == "True" ]]; then
+				##  ##  ##   ##  ##  ##   ##  ##  ##
+				##  labelled output (& total)
+				if [[ "${Word:-false}" == "True" ]]; then
+					# # #   # # #   # # #
+					# (: per word) (+ label) (& total)
+					for ((n=0,i=0;i<${#x};i++)); do
+						((n+=$(_ "${x:$i:1}")))
+					done
+					((total+=n))
+					echo "$x: $n"
+				else
+					# # #   # # #   # # #
+					# (: per char) (+ label) (& total)
+					for((i=0;i<${#x};i++)); do
+						((bet=$(_ "${x:$i:1}")))
+						((total+=bet))
+						echo "${x:$i:1}: $bet"
+					done
+				fi
+
+			else
+				## output only the total
+				for((i=0;i<${#x};i++)); do
+					((total+=$(_ "${x:$i:1}")))
+				done
+			fi
+		else
+			### ### ###   ### ### ###   ### ### ###
+			###   do not include total
+			if [[ "${Label:-false}" == "True" ]]; then
+				##  ##  ##   ##  ##  ##   ##  ##  ##
+				##  labelled output (- total)
+				if [[ "${Word:-false}" == "True" ]]; then
+					# (: per word) (+ label) (- total)
+					for((n=0,i=0;i<${#x};i++)); do
+						((n+=$(_ "${x:$i:1}")))
+					done
+					echo "$x: $n"
+				else
+					# (: per char) (+ label) (- total)
+					for((i=0;i<${#x};i++)); do
+						((bet=$(_ "${x:$i:1}")))
+						echo "${x:$i:1}: $bet"
+					done
+				fi
+			else
+				##  ##  ##  ##  ##  ##  ##  ##  ##
+				## unlabelled output (- total)
+				if [[ "${Word:-false}" == "True" ]]; then
+					# (: per word) (- label) (-total)
+					for((n=0,i=0;i<${#x};i++)); do
+						((n+=$(_ "${x:$i:1}")))
+					done
+					echo "$n"
+				else
+					# default mode: (: per char) (- label) (- total)
+					for((i=0;i<${#x};i++)); do
+						_ "${x:$i:1}"
+					done
+				fi
+			fi
+		fi
+	esac
+done
+[[ "${Total:-false}" != "True" ]] || { [[ "${Label:-false}" == "True" ]] && echo "total: $total" || echo "$total" ; }
