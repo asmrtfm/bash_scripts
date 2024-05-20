@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+[[ "${1,,}" != *(\-)@(h)?(elp) ]] || { cat <<'EOL'
+COMMAND:   max
+SYNOPSIS:
+   Outputs the greatest value from all numerical inputs,
+    which may be supplied from either or both directions.
+
+EOL
+	exit 0
+}
+
+{ printf '%s\n' $({ [ -t 0 ] || cat - ; echo ${@} ; }) | sort -n | tail -n1 ; } 2>/dev/null
